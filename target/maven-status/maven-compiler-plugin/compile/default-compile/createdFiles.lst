@@ -2,3 +2,6 @@ one\digitalinnovation\beerstock\mapper\BeerMapperImpl.class
 one\digitalinnovation\beerstock\dto\QuantityDTO$QuantityDTOBuilder.class
 one\digitalinnovation\beerstock\dto\QuantityDTO.class
 one\digitalinnovation\beerstock\exception\BeerStockExceededException.class
+one\digitalinnovation\beerstock\exception\BeerStockLessThanZeroException.class
+one\digitalinnovation\beerstock\config\SwaggerConfig.class
+one\digitalinnovation\beerstock\controller\impl\BeerControllerImpl.class

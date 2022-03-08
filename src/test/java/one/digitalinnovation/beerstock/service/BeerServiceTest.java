@@ -7,6 +7,7 @@ import one.digitalinnovation.beerstock.entity.Beer;
 import one.digitalinnovation.beerstock.exception.BeerAlreadyRegistredException;
 import one.digitalinnovation.beerstock.exception.BeerNotFoundException;
 import one.digitalinnovation.beerstock.exception.BeerStockExceededException;
+import one.digitalinnovation.beerstock.exception.BeerStockLessThanZeroException;
 import one.digitalinnovation.beerstock.mapper.BeerMapper;
 import one.digitalinnovation.beerstock.repository.BeerRepository;
 import org.junit.jupiter.api.Test;
@@ -158,6 +159,24 @@ public class BeerServiceTest {
         int quantityToIncrement  = 10;
         when(beerRepository.findById(INVALID_USER_ID)).thenReturn(Optional.empty());
         assertThrows(BeerNotFoundException.class, ()-> beerService.increment(INVALID_USER_ID, quantityToIncrement));
+    }
+
+    @Test
+    void whenDecrementAfterSubtractionLessThanZeroThrowException(){
+        BeerDTO expectedBeerDTO = BeerDTOBuilder.builder().build().toBeerDTO();
+        Beer expectedBeer = beerMapper.toModel(expectedBeerDTO);
+
+        when(beerRepository.findById(expectedBeerDTO.getId())).thenReturn(Optional.of(expectedBeer));
+
+        int quantityToDecrement = 80;
+        assertThrows(BeerStockLessThanZeroException.class, () -> beerService.decrement(expectedBeerDTO.getId(),quantityToDecrement));
+    }
+
+    @Test
+    void whenDecrementIsCalledWithInvalidIdThenThrowException(){
+        int quantityToDecrement  = 10;
+        when(beerRepository.findById(INVALID_USER_ID)).thenReturn(Optional.empty());
+        assertThrows(BeerNotFoundException.class, ()-> beerService.decrement(INVALID_USER_ID, quantityToDecrement));
     }
 
 

@@ -1,50 +1,60 @@
 package one.digitalinnovation.beerstock.controller;
 
-import lombok.AllArgsConstructor;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import one.digitalinnovation.beerstock.dto.BeerDTO;
 import one.digitalinnovation.beerstock.dto.QuantityDTO;
 import one.digitalinnovation.beerstock.exception.BeerAlreadyRegistredException;
 import one.digitalinnovation.beerstock.exception.BeerNotFoundException;
 import one.digitalinnovation.beerstock.exception.BeerStockExceededException;
-import one.digitalinnovation.beerstock.service.BeerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import one.digitalinnovation.beerstock.exception.BeerStockLessThanZeroException;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.validation.Valid;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/v1/beers")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
-public class BeerController implements BeerControllerDocs {
+@Api("Manages beer stock")
+public interface BeerController {
 
-    private final BeerService beerService;
+    @ApiOperation(value = "Beer creation operation")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Success beer creation"),
+            @ApiResponse(code = 400, message = "Missing required fields or wrong field range value.")
+    })
+    BeerDTO createBeer(BeerDTO beerDTO) throws BeerAlreadyRegistredException;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public BeerDTO createBeer(@RequestBody @Valid BeerDTO beerDTO) throws BeerAlreadyRegistredException {
-        return beerService.createBeer(beerDTO);
-    }
+    @ApiOperation(value = "Returns beer found by a given name")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success beer found in the system"),
+            @ApiResponse(code = 404, message = "Beer with given name not found.")
+    })
+    BeerDTO findByName(@PathVariable String name) throws BeerNotFoundException;
 
-    @GetMapping("/{name}")
-    public BeerDTO findByName(@PathVariable String name) throws BeerNotFoundException {
-        return beerService.findByName(name);
-    }
+    @ApiOperation(value = "Returns a list of all beers registered in the system")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "List of all beers registered in the system"),
+    })
+    List<BeerDTO> listBeers();
 
-    @GetMapping
-    public List<BeerDTO> listBeers(){
-        return beerService.listAll();
-    }
+    @ApiOperation(value = "Delete a beer found by a given valid Id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Success beer deleted in the system"),
+            @ApiResponse(code = 404, message = "Beer with given id not found.")
+    })
+    void deleteById(@PathVariable Long id) throws BeerNotFoundException;
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable Long id) throws BeerNotFoundException{
-        beerService.deleteById(id);
-    }
+    @ApiOperation(value = "Increment a beer found by a given valid Id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success beer quantity incremented in the system"),
+            @ApiResponse(code = 404, message = "Beer with given id not incremented.")
+    })
+    BeerDTO increment(@PathVariable Long id, QuantityDTO quantityDTO) throws BeerNotFoundException, BeerStockExceededException;
 
-    @PatchMapping("{id}/increment")
-    public BeerDTO increment(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws BeerNotFoundException, BeerStockExceededException {
-        return beerService.increment(id, quantityDTO.getQuantity());
-    }
+    @ApiOperation(value = "Decrement a beer found by a given valid Id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success beer quantity decremented in the system"),
+            @ApiResponse(code = 404, message = "Beer with given id not decremented.")
+    })
+    BeerDTO decrement(@PathVariable Long id, QuantityDTO quantityDTO) throws BeerNotFoundException, BeerStockLessThanZeroException;
 }
